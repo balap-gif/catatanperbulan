@@ -170,17 +170,6 @@
       display: none;
     }
 
-    .login-info {
-      text-align: center;
-      margin-top: 1.5rem;
-      color: rgba(255,255,255,0.5);
-      font-size: 0.7rem;
-    }
-
-    .login-info strong {
-      color: #FFD700;
-    }
-
     /* ========= DASHBOARD STYLES ========= */
     .dashboard {
       max-width: 1440px;
@@ -235,6 +224,18 @@
     .user-info span {
       color: white;
       font-weight: 500;
+    }
+
+    .user-avatar {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #FFD700, #FFA500);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+      color: #1e293b;
     }
 
     .logout-btn {
@@ -569,9 +570,6 @@
     <div id="loginError" class="login-error">
       <i class="fas fa-exclamation-circle"></i> Username atau password salah!
     </div>
-    <div class="login-info">
-      <i class="fas fa-info-circle"></i> Demo: <strong>admin</strong> / <strong>admin123</strong>
-    </div>
   </div>
 </div>
 
@@ -580,11 +578,12 @@
   <div class="header">
     <div class="logo-area">
       <h1><i class="fas fa-crown" style="color: #FFD700;"></i> WealthVault</h1>
+      <p>Kelola tabungan & pengeluaran | Private & Secure</p>
     </div>
     <div style="display: flex; gap: 1rem;">
       <button class="reset-btn" id="resetDataBtn"><i class="fas fa-rotate-left"></i> Reset Data</button>
       <div class="user-info">
-        <i class="fas fa-user-circle" style="color: #FFD700;"></i>
+        <div class="user-avatar" id="userAvatar">U</div>
         <span id="loggedUser">User</span>
         <button class="logout-btn" id="logoutBtn"><i class="fas fa-sign-out-alt"></i> Logout</button>
       </div>
@@ -656,18 +655,31 @@
       </div>
     </div>
     <div id="transactionListContainer" class="transaction-list">
-      <div class="empty-message"><i class="fas fa-inbox"></i> Belum ada transaksi</div>
+      <div class="empty-message"><i class="fas fa-inbox"></i> Belum ada transaksi. Mulai tambahkan transaksi pertama Anda!</div>
     </div>
   </div>
-  <footer>✨ Data tersimpan otomatis di browser Anda | WealthVault — Secure & Elegant</footer>
+  <footer>✨ Data tersimpan aman di browser Anda | WealthVault — Private Financial Dashboard</footer>
 </div>
 
 <script>
-  // ========= AUTHENTICATION =========
-  const VALID_USERNAME = 'aris';
-  const VALID_PASSWORD = 'awas123';
-  
-  let isLoggedIn = false;
+  // ========= DAFTAR AKUN (PRIVATE) =========
+  // Anda dapat menambahkan atau menghapus akun sesuai kebutuhan
+  const USERS = {
+    'aris': {
+      password: 'awas123',
+      name: 'Aris',
+      avatar: 'A',
+      storageKey: 'wealthvault_aris'
+    },
+    'rifaldi': {
+      password: 'asd123',
+      name: 'rifaldi',
+      avatar: 'R',
+      storageKey: 'wealthvault_budi'
+    }
+  };
+
+  let currentUser = null;
   let transactions = [];
   let currentFilter = 'all';
   let chart = null;
@@ -681,6 +693,7 @@
   const passwordInput = document.getElementById('passwordInput');
   const loginError = document.getElementById('loginError');
   const loggedUserSpan = document.getElementById('loggedUser');
+  const userAvatar = document.getElementById('userAvatar');
 
   // Dashboard Elements
   const totalBalanceSpan = document.getElementById('totalBalanceDisplay');
@@ -699,53 +712,49 @@
   const quickFood = document.getElementById('quickFoodBtn');
   const transactionContainer = document.getElementById('transactionListContainer');
 
-  // Login handler
-  function handleLogin() {
-    const username = usernameInput.value.trim();
-    const password = passwordInput.value.trim();
+  // ========= FUNGSI LOGIN =========
+  function handleLogin(username, password) {
+    const user = USERS[username.toLowerCase()];
     
-    if (username === VALID_USERNAME && password === VALID_PASSWORD) {
-      isLoggedIn = true;
+    if (user && user.password === password) {
+      currentUser = {
+        username: username.toLowerCase(),
+        name: user.name,
+        avatar: user.avatar,
+        storageKey: user.storageKey
+      };
+      
       loginContainer.style.display = 'none';
       dashboardDiv.classList.add('visible');
-      loggedUserSpan.textContent = username;
-      loadDashboardData();
+      loggedUserSpan.textContent = user.name;
+      userAvatar.textContent = user.avatar;
+      
+      loadUserData();
+      return true;
     } else {
       loginError.style.display = 'block';
       setTimeout(() => {
         loginError.style.display = 'none';
       }, 3000);
+      return false;
     }
   }
 
-  // Logout handler
+  // Logout
   function handleLogout() {
-    isLoggedIn = false;
+    currentUser = null;
+    transactions = [];
     loginContainer.style.display = 'flex';
     dashboardDiv.classList.remove('visible');
     usernameInput.value = '';
     passwordInput.value = '';
   }
 
-  // Load data setelah login
-  function loadDashboardData() {
-    loadFromLocalStorage();
-    setDefaultDate();
-    updateDashboard();
-    initFilters();
-  }
-
-  // ========= FINANCIAL FUNCTIONS =========
-  function formatRupiah(amount) {
-    return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(amount);
-  }
-
-  function saveToLocalStorage() {
-    localStorage.setItem('wealthvault_transactions', JSON.stringify(transactions));
-  }
-
-  function loadFromLocalStorage() {
-    const stored = localStorage.getItem('wealthvault_transactions');
+  // ========= FUNGSI DATA PER USER =========
+  function loadUserData() {
+    if (!currentUser) return;
+    
+    const stored = localStorage.getItem(currentUser.storageKey);
     if (stored && stored !== 'undefined') {
       try {
         transactions = JSON.parse(stored);
@@ -753,20 +762,26 @@
       } catch(e) { 
         transactions = []; 
       }
+    } else {
+      // Kosongkan transaksi, tidak ada data contoh
+      transactions = [];
+      saveUserData();
     }
     
-    if (!transactions || transactions.length === 0) {
-      const today = new Date().toISOString().split('T')[0];
-      const yesterday = new Date(Date.now() - 86400000).toISOString().split('T')[0];
-      transactions = [
-        { id: Date.now() + 1, description: 'Gaji Bulanan', amount: 5000000, type: 'income', date: today },
-        { id: Date.now() + 2, description: 'Makan Siang', amount: 75000, type: 'expense', date: today },
-        { id: Date.now() + 3, description: 'Bonus Project', amount: 1500000, type: 'income', date: yesterday },
-        { id: Date.now() + 4, description: 'Belanja Bulanan', amount: 450000, type: 'expense', date: yesterday },
-        { id: Date.now() + 5, description: 'Tabungan Investasi', amount: 2000000, type: 'income', date: yesterday },
-      ];
-      saveToLocalStorage();
+    setDefaultDate();
+    updateDashboard();
+    initFilters();
+  }
+
+  function saveUserData() {
+    if (currentUser) {
+      localStorage.setItem(currentUser.storageKey, JSON.stringify(transactions));
     }
+  }
+
+  // ========= FUNGSI KEUANGAN =========
+  function formatRupiah(amount) {
+    return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(amount);
   }
 
   function computeTotals() {
@@ -814,7 +829,7 @@
     filtered.sort((a,b) => new Date(b.date) - new Date(a.date));
 
     if (filtered.length === 0) {
-      transactionContainer.innerHTML = `<div class="empty-message"><i class="fas fa-inbox"></i> Tidak ada transaksi</div>`;
+      transactionContainer.innerHTML = `<div class="empty-message"><i class="fas fa-inbox"></i> Belum ada transaksi. Mulai tambahkan transaksi pertama Anda!</div>`;
       return;
     }
 
@@ -874,7 +889,7 @@
 
     updateChart(totalIncome, totalExpense);
     renderTransactionList();
-    saveToLocalStorage();
+    saveUserData();
   }
 
   function escapeHtml(str) {
@@ -930,7 +945,7 @@
   }
 
   function resetAllData() {
-    if (confirm('⚠️ Yakin ingin menghapus SEMUA data keuangan? Tindakan ini tidak dapat dibatalkan!')) {
+    if (confirm('⚠️ Yakin ingin menghapus SEMUA data keuangan untuk akun ' + currentUser.name + '? Tindakan ini tidak dapat dibatalkan!')) {
       transactions = [];
       updateDashboard();
       alert('✅ Semua data telah direset');
@@ -972,14 +987,17 @@
     }
   }
 
-  // Event Listeners
-  loginBtn.addEventListener('click', handleLogin);
+  // ========= EVENT LISTENERS =========
+  loginBtn.addEventListener('click', () => {
+    handleLogin(usernameInput.value, passwordInput.value);
+  });
+  
   logoutBtn.addEventListener('click', handleLogout);
   
-  usernameInput.addEventListener('keypress', (e) => { if(e.key === 'Enter') handleLogin(); });
-  passwordInput.addEventListener('keypress', (e) => { if(e.key === 'Enter') handleLogin(); });
+  usernameInput.addEventListener('keypress', (e) => { if(e.key === 'Enter') handleLogin(usernameInput.value, passwordInput.value); });
+  passwordInput.addEventListener('keypress', (e) => { if(e.key === 'Enter') handleLogin(usernameInput.value, passwordInput.value); });
 
-  // Dashboard event listeners (akan aktif setelah login)
+  // Dashboard event listeners
   addBtn.addEventListener('click', handleAddTransaction);
   resetBtn.addEventListener('click', resetAllData);
   quickSalary.addEventListener('click', quickSalaryAction);
