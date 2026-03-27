@@ -1,0 +1,1009 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+  <title>WealthVault | Secure Financial Dashboard</title>
+  <!-- Chart.js CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <!-- Font Awesome 6 -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700;14..32,800&display=swap" rel="stylesheet">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      min-height: 100vh;
+      position: relative;
+      background-image: url('https://i.pinimg.com/1200x/38/25/01/3825010eccd22dbe5b19c8c5baf29d27.jpg');
+      background-size: cover;
+      background-position: center bottom;
+      background-attachment: fixed;
+    }
+    
+    /* Overlay gelap */
+    body::before {
+      content: '';
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: linear-gradient(135deg, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0.5) 100%);
+      z-index: 0;
+    }
+
+    /* ========= LOGIN PAGE STYLES ========= */
+    .login-container {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+      backdrop-filter: blur(8px);
+      transition: all 0.4s ease;
+    }
+
+    .login-box {
+      background: rgba(15, 23, 42, 0.85);
+      backdrop-filter: blur(20px);
+      border-radius: 2rem;
+      padding: 2.5rem;
+      width: 90%;
+      max-width: 420px;
+      border: 1px solid rgba(255,255,255,0.3);
+      box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5);
+      animation: fadeInUp 0.5s ease;
+    }
+
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(30px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .login-logo {
+      text-align: center;
+      margin-bottom: 2rem;
+    }
+
+    .login-logo i {
+      font-size: 3rem;
+      color: #FFD700;
+      margin-bottom: 0.5rem;
+    }
+
+    .login-logo h2 {
+      font-size: 1.8rem;
+      font-weight: 800;
+      background: linear-gradient(135deg, #FFD700 0%, #FFA500 100%);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+    }
+
+    .login-logo p {
+      color: rgba(255,255,255,0.7);
+      font-size: 0.85rem;
+      margin-top: 0.25rem;
+    }
+
+    .input-group-login {
+      margin-bottom: 1.2rem;
+    }
+
+    .input-group-login label {
+      display: block;
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: rgba(255,255,255,0.8);
+      margin-bottom: 0.5rem;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .input-group-login input {
+      width: 100%;
+      padding: 0.9rem 1rem;
+      border-radius: 1rem;
+      border: 1px solid rgba(255,255,255,0.3);
+      background: rgba(255,255,255,0.9);
+      font-size: 0.95rem;
+      font-family: 'Inter', sans-serif;
+      transition: all 0.3s;
+    }
+
+    .input-group-login input:focus {
+      outline: none;
+      border-color: #FFD700;
+      box-shadow: 0 0 0 3px rgba(255,215,0,0.3);
+      background: white;
+    }
+
+    .login-btn {
+      background: linear-gradient(135deg, #FFD700 0%, #FFA500 100%);
+      color: #1e293b;
+      width: 100%;
+      padding: 0.9rem;
+      border: none;
+      border-radius: 1.2rem;
+      font-weight: 800;
+      font-size: 1rem;
+      margin-top: 0.5rem;
+      cursor: pointer;
+      transition: all 0.3s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+
+    .login-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 25px -5px rgba(0,0,0,0.3);
+    }
+
+    .login-error {
+      background: rgba(239,68,68,0.2);
+      border: 1px solid rgba(239,68,68,0.5);
+      border-radius: 1rem;
+      padding: 0.75rem;
+      margin-top: 1rem;
+      text-align: center;
+      color: #f87171;
+      font-size: 0.85rem;
+      display: none;
+    }
+
+    .login-info {
+      text-align: center;
+      margin-top: 1.5rem;
+      color: rgba(255,255,255,0.5);
+      font-size: 0.7rem;
+    }
+
+    .login-info strong {
+      color: #FFD700;
+    }
+
+    /* ========= DASHBOARD STYLES ========= */
+    .dashboard {
+      max-width: 1440px;
+      margin: 0 auto;
+      position: relative;
+      z-index: 1;
+      padding: 2rem;
+      display: none;
+    }
+
+    .dashboard.visible {
+      display: block;
+    }
+
+    /* Header */
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 2rem;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+
+    .logo-area h1 {
+      font-size: 1.8rem;
+      font-weight: 800;
+      background: linear-gradient(135deg, #FFD700 0%, #FFA500 100%);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+      letter-spacing: -0.5px;
+    }
+
+    .logo-area p {
+      color: rgba(255,255,255,0.9);
+      font-size: 0.85rem;
+      margin-top: 0.25rem;
+    }
+
+    .user-info {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      background: rgba(255,255,255,0.2);
+      backdrop-filter: blur(12px);
+      padding: 0.5rem 1.2rem;
+      border-radius: 50px;
+      border: 1px solid rgba(255,255,255,0.25);
+    }
+
+    .user-info span {
+      color: white;
+      font-weight: 500;
+    }
+
+    .logout-btn {
+      background: rgba(255,255,255,0.2);
+      border: none;
+      padding: 0.4rem 1rem;
+      border-radius: 40px;
+      color: white;
+      cursor: pointer;
+      font-size: 0.8rem;
+      transition: all 0.2s;
+    }
+
+    .logout-btn:hover {
+      background: rgba(239,68,68,0.6);
+    }
+
+    .reset-btn {
+      background: rgba(255,255,255,0.2);
+      backdrop-filter: blur(12px);
+      border: 1px solid rgba(255,255,255,0.25);
+      padding: 0.7rem 1.5rem;
+      border-radius: 50px;
+      font-weight: 600;
+      font-size: 0.9rem;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      color: white;
+    }
+
+    .reset-btn:hover {
+      background: rgba(255,255,255,0.35);
+      transform: translateY(-2px);
+    }
+
+    /* Balance Card */
+    .balance-card {
+      background: rgba(15, 23, 42, 0.7);
+      backdrop-filter: blur(16px);
+      border-radius: 2rem;
+      padding: 2rem;
+      margin-bottom: 2rem;
+      border: 1px solid rgba(255,255,255,0.2);
+    }
+
+    .balance-label {
+      font-size: 0.9rem;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      color: rgba(255,255,255,0.7);
+    }
+
+    .balance-amount {
+      font-size: 3.5rem;
+      font-weight: 800;
+      margin: 0.75rem 0 1rem;
+      color: white;
+    }
+
+    .balance-stats {
+      display: flex;
+      gap: 1.5rem;
+      flex-wrap: wrap;
+    }
+
+    .stat-item {
+      background: rgba(255,255,255,0.15);
+      padding: 0.6rem 1.2rem;
+      border-radius: 60px;
+      font-size: 0.85rem;
+      color: white;
+    }
+
+    /* Grid */
+    .two-col {
+      display: grid;
+      grid-template-columns: 1fr 1.2fr;
+      gap: 1.8rem;
+      margin-bottom: 2rem;
+    }
+
+    @media (max-width: 900px) {
+      .two-col {
+        grid-template-columns: 1fr;
+      }
+      .dashboard {
+        padding: 1rem;
+      }
+    }
+
+    /* Form Panel */
+    .form-panel, .insight-panel, .history-section {
+      background: rgba(255,255,255,0.2);
+      backdrop-filter: blur(20px);
+      border-radius: 1.5rem;
+      padding: 1.5rem;
+      border: 1px solid rgba(255,255,255,0.3);
+    }
+
+    .form-panel h3, .insight-panel h3, .history-header h3 {
+      color: white;
+      margin-bottom: 1rem;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .input-group {
+      margin-bottom: 1rem;
+    }
+
+    .input-group label {
+      display: block;
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: rgba(255,255,255,0.9);
+      margin-bottom: 0.5rem;
+      text-transform: uppercase;
+    }
+
+    .input-group input {
+      width: 100%;
+      padding: 0.85rem 1rem;
+      border-radius: 1rem;
+      border: 1px solid rgba(255,255,255,0.3);
+      background: rgba(255,255,255,0.9);
+      font-size: 0.95rem;
+    }
+
+    .input-group input:focus {
+      outline: none;
+      border-color: #FFD700;
+    }
+
+    .radio-group {
+      display: flex;
+      gap: 1.5rem;
+      margin-top: 0.5rem;
+    }
+
+    .radio-group label {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      cursor: pointer;
+      text-transform: none;
+      color: white;
+    }
+
+    .btn-submit {
+      background: linear-gradient(135deg, #FFD700 0%, #FFA500 100%);
+      color: #1e293b;
+      width: 100%;
+      padding: 0.9rem;
+      border: none;
+      border-radius: 1.2rem;
+      font-weight: 800;
+      margin-top: 1rem;
+      cursor: pointer;
+    }
+
+    .quick-actions {
+      display: flex;
+      gap: 1rem;
+      margin-top: 1rem;
+    }
+
+    .quick-btn {
+      flex: 1;
+      background: rgba(255,255,255,0.2);
+      border: 1px solid rgba(255,255,255,0.3);
+      padding: 0.6rem;
+      border-radius: 1rem;
+      font-size: 0.8rem;
+      font-weight: 600;
+      cursor: pointer;
+      color: white;
+    }
+
+    .chart-container {
+      height: 240px;
+      margin-bottom: 1rem;
+    }
+
+    .summary-stats {
+      display: flex;
+      justify-content: space-between;
+      background: rgba(0,0,0,0.3);
+      border-radius: 1.2rem;
+      padding: 1rem;
+    }
+
+    .summary-stats div {
+      text-align: center;
+      flex: 1;
+    }
+
+    .summary-stats .label-sm {
+      font-size: 0.7rem;
+      color: rgba(255,255,255,0.8);
+    }
+
+    .summary-stats .value-sm {
+      font-weight: 800;
+      font-size: 1.1rem;
+      color: white;
+    }
+
+    .history-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      margin-bottom: 1rem;
+    }
+
+    .filter-btns {
+      display: flex;
+      gap: 0.6rem;
+    }
+
+    .filter-chip {
+      background: rgba(255,255,255,0.2);
+      padding: 0.4rem 1rem;
+      border-radius: 40px;
+      font-size: 0.75rem;
+      cursor: pointer;
+      color: white;
+    }
+
+    .filter-chip.active {
+      background: linear-gradient(135deg, #FFD700 0%, #FFA500 100%);
+      color: #1e293b;
+    }
+
+    .transaction-list {
+      max-height: 350px;
+      overflow-y: auto;
+    }
+
+    .transaction-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 1rem 0;
+      border-bottom: 1px solid rgba(255,255,255,0.2);
+    }
+
+    .trans-info {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .trans-icon {
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .icon-income {
+      background: rgba(34,197,94,0.3);
+      color: #4ade80;
+    }
+
+    .icon-expense {
+      background: rgba(239,68,68,0.3);
+      color: #f87171;
+    }
+
+    .trans-title {
+      font-weight: 700;
+      color: white;
+    }
+
+    .trans-date {
+      font-size: 0.7rem;
+      color: rgba(255,255,255,0.7);
+    }
+
+    .income-amount { color: #4ade80; font-weight: 800; }
+    .expense-amount { color: #f87171; font-weight: 800; }
+
+    .delete-trans {
+      background: transparent;
+      border: none;
+      color: rgba(255,255,255,0.5);
+      cursor: pointer;
+      padding: 0.5rem;
+    }
+
+    .delete-trans:hover {
+      color: #ef4444;
+    }
+
+    .empty-message {
+      text-align: center;
+      padding: 2rem;
+      color: rgba(255,255,255,0.7);
+    }
+
+    footer {
+      text-align: center;
+      margin-top: 2rem;
+      font-size: 0.7rem;
+      color: rgba(255,255,255,0.6);
+    }
+  </style>
+</head>
+<body>
+
+<!-- LOGIN PAGE -->
+<div id="loginContainer" class="login-container">
+  <div class="login-box">
+    <div class="login-logo">
+      <i class="fas fa-crown"></i>
+      <h2>WealthVault</h2>
+      <p>Secure Financial Dashboard</p>
+    </div>
+    <div class="input-group-login">
+      <label><i class="fas fa-user"></i> Username</label>
+      <input type="text" id="usernameInput" placeholder="Masukkan username" autocomplete="off">
+    </div>
+    <div class="input-group-login">
+      <label><i class="fas fa-lock"></i> Password</label>
+      <input type="password" id="passwordInput" placeholder="Masukkan password">
+    </div>
+    <button class="login-btn" id="loginBtn"><i class="fas fa-sign-in-alt"></i> Masuk</button>
+    <div id="loginError" class="login-error">
+      <i class="fas fa-exclamation-circle"></i> Username atau password salah!
+    </div>
+    <div class="login-info">
+      <i class="fas fa-info-circle"></i> Demo: <strong>admin</strong> / <strong>admin123</strong>
+    </div>
+  </div>
+</div>
+
+<!-- DASHBOARD -->
+<div id="dashboard" class="dashboard">
+  <div class="header">
+    <div class="logo-area">
+      <h1><i class="fas fa-crown" style="color: #FFD700;"></i> WealthVault</h1>
+    </div>
+    <div style="display: flex; gap: 1rem;">
+      <button class="reset-btn" id="resetDataBtn"><i class="fas fa-rotate-left"></i> Reset Data</button>
+      <div class="user-info">
+        <i class="fas fa-user-circle" style="color: #FFD700;"></i>
+        <span id="loggedUser">User</span>
+        <button class="logout-btn" id="logoutBtn"><i class="fas fa-sign-out-alt"></i> Logout</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Balance Card -->
+  <div class="balance-card">
+    <div class="balance-label"><i class="fas fa-wallet"></i> TOTAL SALDO</div>
+    <div class="balance-amount" id="totalBalanceDisplay">Rp0</div>
+    <div class="balance-stats">
+      <div class="stat-item"><i class="fas fa-arrow-up"></i> <span id="totalIncomeStat">Rp0</span></div>
+      <div class="stat-item"><i class="fas fa-arrow-down"></i> <span id="totalExpenseStat">Rp0</span></div>
+      <div class="stat-item"><i class="fas fa-chart-line"></i> <span id="totalTxCount">0</span> Transaksi</div>
+    </div>
+  </div>
+
+  <!-- Two Column -->
+  <div class="two-col">
+    <div class="form-panel">
+      <h3><i class="fas fa-plus-circle" style="color: #FFD700;"></i> Tambah Transaksi</h3>
+      <div class="input-group">
+        <label>Deskripsi</label>
+        <input type="text" id="descInput" placeholder="Contoh: Gaji, Makan siang">
+      </div>
+      <div class="input-group">
+        <label>Jumlah (Rp)</label>
+        <input type="number" id="amountInput" placeholder="0">
+      </div>
+      <div class="input-group">
+        <label>Jenis</label>
+        <div class="radio-group">
+          <label><input type="radio" name="typeRadio" value="income" checked> <i class="fas fa-arrow-up"></i> Pemasukan</label>
+          <label><input type="radio" name="typeRadio" value="expense"> <i class="fas fa-arrow-down"></i> Pengeluaran</label>
+        </div>
+      </div>
+      <div class="input-group">
+        <label>Tanggal</label>
+        <input type="date" id="dateInput">
+      </div>
+      <button class="btn-submit" id="addTransactionBtn"><i class="fas fa-save"></i> Simpan Transaksi</button>
+      <div class="quick-actions">
+        <button class="quick-btn" id="quickSalaryBtn"><i class="fas fa-briefcase"></i> Gaji +5jt</button>
+        <button class="quick-btn" id="quickFoodBtn"><i class="fas fa-utensils"></i> Makan 50rb</button>
+      </div>
+    </div>
+
+    <div class="insight-panel">
+      <h3><i class="fas fa-chart-pie"></i> Analisis Keuangan</h3>
+      <div class="chart-container">
+        <canvas id="incomeExpenseChart"></canvas>
+      </div>
+      <div class="summary-stats">
+        <div><div class="label-sm">💵 PEMASUKAN</div><div class="value-sm" id="miniIncome">Rp0</div></div>
+        <div><div class="label-sm">💸 PENGELUARAN</div><div class="value-sm" id="miniExpense">Rp0</div></div>
+        <div><div class="label-sm">📊 RASIO</div><div class="value-sm" id="ratioDisplay">-</div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- History -->
+  <div class="history-section">
+    <div class="history-header">
+      <h3><i class="fas fa-clock"></i> Riwayat Transaksi</h3>
+      <div class="filter-btns">
+        <span class="filter-chip active" data-filter="all">Semua</span>
+        <span class="filter-chip" data-filter="income">Pemasukan</span>
+        <span class="filter-chip" data-filter="expense">Pengeluaran</span>
+      </div>
+    </div>
+    <div id="transactionListContainer" class="transaction-list">
+      <div class="empty-message"><i class="fas fa-inbox"></i> Belum ada transaksi</div>
+    </div>
+  </div>
+  <footer>✨ Data tersimpan otomatis di browser Anda | WealthVault — Secure & Elegant</footer>
+</div>
+
+<script>
+  // ========= AUTHENTICATION =========
+  const VALID_USERNAME = 'aris';
+  const VALID_PASSWORD = 'awas123';
+  
+  let isLoggedIn = false;
+  let transactions = [];
+  let currentFilter = 'all';
+  let chart = null;
+
+  // DOM Elements
+  const loginContainer = document.getElementById('loginContainer');
+  const dashboardDiv = document.getElementById('dashboard');
+  const loginBtn = document.getElementById('loginBtn');
+  const logoutBtn = document.getElementById('logoutBtn');
+  const usernameInput = document.getElementById('usernameInput');
+  const passwordInput = document.getElementById('passwordInput');
+  const loginError = document.getElementById('loginError');
+  const loggedUserSpan = document.getElementById('loggedUser');
+
+  // Dashboard Elements
+  const totalBalanceSpan = document.getElementById('totalBalanceDisplay');
+  const totalIncomeSpan = document.getElementById('totalIncomeStat');
+  const totalExpenseSpan = document.getElementById('totalExpenseStat');
+  const totalTxCountSpan = document.getElementById('totalTxCount');
+  const miniIncomeSpan = document.getElementById('miniIncome');
+  const miniExpenseSpan = document.getElementById('miniExpense');
+  const ratioSpan = document.getElementById('ratioDisplay');
+  const descInput = document.getElementById('descInput');
+  const amountInput = document.getElementById('amountInput');
+  const dateInput = document.getElementById('dateInput');
+  const addBtn = document.getElementById('addTransactionBtn');
+  const resetBtn = document.getElementById('resetDataBtn');
+  const quickSalary = document.getElementById('quickSalaryBtn');
+  const quickFood = document.getElementById('quickFoodBtn');
+  const transactionContainer = document.getElementById('transactionListContainer');
+
+  // Login handler
+  function handleLogin() {
+    const username = usernameInput.value.trim();
+    const password = passwordInput.value.trim();
+    
+    if (username === VALID_USERNAME && password === VALID_PASSWORD) {
+      isLoggedIn = true;
+      loginContainer.style.display = 'none';
+      dashboardDiv.classList.add('visible');
+      loggedUserSpan.textContent = username;
+      loadDashboardData();
+    } else {
+      loginError.style.display = 'block';
+      setTimeout(() => {
+        loginError.style.display = 'none';
+      }, 3000);
+    }
+  }
+
+  // Logout handler
+  function handleLogout() {
+    isLoggedIn = false;
+    loginContainer.style.display = 'flex';
+    dashboardDiv.classList.remove('visible');
+    usernameInput.value = '';
+    passwordInput.value = '';
+  }
+
+  // Load data setelah login
+  function loadDashboardData() {
+    loadFromLocalStorage();
+    setDefaultDate();
+    updateDashboard();
+    initFilters();
+  }
+
+  // ========= FINANCIAL FUNCTIONS =========
+  function formatRupiah(amount) {
+    return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(amount);
+  }
+
+  function saveToLocalStorage() {
+    localStorage.setItem('wealthvault_transactions', JSON.stringify(transactions));
+  }
+
+  function loadFromLocalStorage() {
+    const stored = localStorage.getItem('wealthvault_transactions');
+    if (stored && stored !== 'undefined') {
+      try {
+        transactions = JSON.parse(stored);
+        transactions = transactions.map(t => ({ ...t, id: t.id || Date.now() + Math.random() }));
+      } catch(e) { 
+        transactions = []; 
+      }
+    }
+    
+    if (!transactions || transactions.length === 0) {
+      const today = new Date().toISOString().split('T')[0];
+      const yesterday = new Date(Date.now() - 86400000).toISOString().split('T')[0];
+      transactions = [
+        { id: Date.now() + 1, description: 'Gaji Bulanan', amount: 5000000, type: 'income', date: today },
+        { id: Date.now() + 2, description: 'Makan Siang', amount: 75000, type: 'expense', date: today },
+        { id: Date.now() + 3, description: 'Bonus Project', amount: 1500000, type: 'income', date: yesterday },
+        { id: Date.now() + 4, description: 'Belanja Bulanan', amount: 450000, type: 'expense', date: yesterday },
+        { id: Date.now() + 5, description: 'Tabungan Investasi', amount: 2000000, type: 'income', date: yesterday },
+      ];
+      saveToLocalStorage();
+    }
+  }
+
+  function computeTotals() {
+    let totalIncome = 0, totalExpense = 0;
+    for (let t of transactions) {
+      if (t.type === 'income') totalIncome += t.amount;
+      else totalExpense += t.amount;
+    }
+    return { totalIncome, totalExpense, balance: totalIncome - totalExpense, count: transactions.length };
+  }
+
+  function updateChart(incomeVal, expenseVal) {
+    const ctx = document.getElementById('incomeExpenseChart').getContext('2d');
+    if (chart) {
+      chart.data.datasets[0].data = [incomeVal, expenseVal];
+      chart.update();
+    } else {
+      chart = new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+          labels: ['Pemasukan', 'Pengeluaran'],
+          datasets: [{
+            data: [incomeVal, expenseVal],
+            backgroundColor: ['#FFD700', '#FF6B6B'],
+            borderWidth: 0,
+            hoverOffset: 12,
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: true,
+          plugins: {
+            legend: { position: 'bottom', labels: { font: { size: 12, weight: 'bold' }, color: 'white' } },
+            tooltip: { callbacks: { label: (ctx) => `${ctx.label}: ${formatRupiah(ctx.raw)}` } }
+          }
+        }
+      });
+    }
+  }
+
+  function renderTransactionList() {
+    let filtered = [...transactions];
+    if (currentFilter === 'income') filtered = filtered.filter(t => t.type === 'income');
+    if (currentFilter === 'expense') filtered = filtered.filter(t => t.type === 'expense');
+    filtered.sort((a,b) => new Date(b.date) - new Date(a.date));
+
+    if (filtered.length === 0) {
+      transactionContainer.innerHTML = `<div class="empty-message"><i class="fas fa-inbox"></i> Tidak ada transaksi</div>`;
+      return;
+    }
+
+    transactionContainer.innerHTML = '';
+    for (let tx of filtered) {
+      const itemDiv = document.createElement('div');
+      itemDiv.className = 'transaction-item';
+      const isIncome = tx.type === 'income';
+      const iconClass = isIncome ? 'icon-income' : 'icon-expense';
+      const iconSymbol = isIncome ? '<i class="fas fa-arrow-trend-up"></i>' : '<i class="fas fa-arrow-trend-down"></i>';
+      const amountClass = isIncome ? 'income-amount' : 'expense-amount';
+      const amountPrefix = isIncome ? '+ ' : '- ';
+      const formattedDate = tx.date ? tx.date.split('-').reverse().join('/') : '-';
+
+      itemDiv.innerHTML = `
+        <div class="trans-info">
+          <div class="trans-icon ${iconClass}">${iconSymbol}</div>
+          <div class="trans-detail">
+            <div class="trans-title">${escapeHtml(tx.description)}</div>
+            <div class="trans-date"><i class="far fa-calendar-alt"></i> ${formattedDate}</div>
+          </div>
+        </div>
+        <div style="display: flex; align-items: center; gap: 12px;">
+          <div class="${amountClass}">${amountPrefix}${formatRupiah(tx.amount)}</div>
+          <button class="delete-trans" data-id="${tx.id}"><i class="fas fa-trash-alt"></i></button>
+        </div>
+      `;
+      transactionContainer.appendChild(itemDiv);
+    }
+
+    document.querySelectorAll('.delete-trans').forEach(btn => {
+      btn.addEventListener('click', function(e) {
+        e.stopPropagation();
+        const id = Number(this.getAttribute('data-id'));
+        transactions = transactions.filter(t => t.id !== id);
+        updateDashboard();
+      });
+    });
+  }
+
+  function updateDashboard() {
+    const { totalIncome, totalExpense, balance, count } = computeTotals();
+    totalBalanceSpan.innerText = formatRupiah(balance);
+    totalIncomeSpan.innerText = formatRupiah(totalIncome);
+    totalExpenseSpan.innerText = formatRupiah(totalExpense);
+    totalTxCountSpan.innerText = count;
+    miniIncomeSpan.innerText = formatRupiah(totalIncome);
+    miniExpenseSpan.innerText = formatRupiah(totalExpense);
+    
+    if (totalExpense === 0) {
+      ratioSpan.innerText = totalIncome === 0 ? '0%' : '100% Tabungan';
+    } else {
+      const ratioVal = (totalExpense / totalIncome) * 100;
+      if (totalIncome === 0) ratioSpan.innerText = 'N/A';
+      else ratioSpan.innerText = `${Math.min(100, Math.round(ratioVal))}% Expense`;
+    }
+
+    updateChart(totalIncome, totalExpense);
+    renderTransactionList();
+    saveToLocalStorage();
+  }
+
+  function escapeHtml(str) {
+    if (!str) return '';
+    return str.replace(/[&<>]/g, function(m) {
+      if (m === '&') return '&amp;';
+      if (m === '<') return '&lt;';
+      if (m === '>') return '&gt;';
+      return m;
+    });
+  }
+
+  function addTransaction(description, amount, type, date) {
+    if (!description || description.trim() === '') {
+      alert('⚠️ Deskripsi tidak boleh kosong!');
+      return false;
+    }
+    if (isNaN(amount) || amount <= 0) {
+      alert('⚠️ Jumlah harus lebih dari 0');
+      return false;
+    }
+    if (!date) {
+      alert('⚠️ Pilih tanggal transaksi');
+      return false;
+    }
+    
+    const newId = Date.now() + Math.floor(Math.random() * 10000);
+    transactions.push({
+      id: newId,
+      description: description.trim(),
+      amount: Number(amount),
+      type: type,
+      date: date,
+    });
+    updateDashboard();
+    return true;
+  }
+
+  function handleAddTransaction() {
+    const desc = descInput.value.trim();
+    const amount = parseFloat(amountInput.value);
+    const type = document.querySelector('input[name="typeRadio"]:checked').value;
+    let date = dateInput.value;
+    if (!date) {
+      date = new Date().toISOString().split('T')[0];
+      dateInput.value = date;
+    }
+    if (addTransaction(desc, amount, type, date)) {
+      descInput.value = '';
+      amountInput.value = '';
+      descInput.focus();
+    }
+  }
+
+  function resetAllData() {
+    if (confirm('⚠️ Yakin ingin menghapus SEMUA data keuangan? Tindakan ini tidak dapat dibatalkan!')) {
+      transactions = [];
+      updateDashboard();
+      alert('✅ Semua data telah direset');
+    }
+  }
+
+  function quickSalaryAction() {
+    descInput.value = 'Gaji / Pendapatan';
+    amountInput.value = '5000000';
+    document.querySelector('input[value="income"]').checked = true;
+    dateInput.value = new Date().toISOString().split('T')[0];
+    handleAddTransaction();
+  }
+
+  function quickFoodAction() {
+    descInput.value = 'Makan & Minum';
+    amountInput.value = '50000';
+    document.querySelector('input[value="expense"]').checked = true;
+    dateInput.value = new Date().toISOString().split('T')[0];
+    handleAddTransaction();
+  }
+
+  function initFilters() {
+    const chips = document.querySelectorAll('.filter-chip');
+    chips.forEach(chip => {
+      chip.addEventListener('click', function() {
+        const filter = this.getAttribute('data-filter');
+        currentFilter = filter;
+        chips.forEach(c => c.classList.remove('active'));
+        this.classList.add('active');
+        renderTransactionList();
+      });
+    });
+  }
+
+  function setDefaultDate() {
+    if (dateInput && !dateInput.value) {
+      dateInput.value = new Date().toISOString().split('T')[0];
+    }
+  }
+
+  // Event Listeners
+  loginBtn.addEventListener('click', handleLogin);
+  logoutBtn.addEventListener('click', handleLogout);
+  
+  usernameInput.addEventListener('keypress', (e) => { if(e.key === 'Enter') handleLogin(); });
+  passwordInput.addEventListener('keypress', (e) => { if(e.key === 'Enter') handleLogin(); });
+
+  // Dashboard event listeners (akan aktif setelah login)
+  addBtn.addEventListener('click', handleAddTransaction);
+  resetBtn.addEventListener('click', resetAllData);
+  quickSalary.addEventListener('click', quickSalaryAction);
+  quickFood.addEventListener('click', quickFoodAction);
+  amountInput.addEventListener('keypress', (e) => { if(e.key === 'Enter') handleAddTransaction(); });
+  descInput.addEventListener('keypress', (e) => { if(e.key === 'Enter') handleAddTransaction(); });
+</script>
+</body>
+</html>
+<script>
+document.addEventListener('contextmenu', e => e.preventDefault());
+
+document.addEventListener('keydown', function(e) {
+    if (e.key === 'F12') e.preventDefault();
+    if (e.ctrlKey && e.shiftKey && ['I','J','C'].includes(e.key.toUpperCase())) e.preventDefault();
+    if (e.ctrlKey && e.key.toUpperCase() === 'U') e.preventDefault();
+});
+
+setInterval(() => {
+    const before = new Date();
+    debugger;
+    const after = new Date();
+    if (after - before > 100) {
+        document.body.innerHTML = '<h1 style="text-align:center;margin-top:50px;">Akses ditolak</h1>';
+    }
+}, 1000);
+</script>
