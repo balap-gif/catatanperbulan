@@ -213,7 +213,7 @@
     .user-info {
       display: flex;
       align-items: center;
-      gap: 1rem;
+      gap: 0.8rem;
       background: rgba(255,255,255,0.2);
       backdrop-filter: blur(12px);
       padding: 0.5rem 1.2rem;
@@ -253,22 +253,129 @@
       background: rgba(239,68,68,0.6);
     }
 
-    .reset-btn {
+    .reset-btn, .change-password-btn {
       background: rgba(255,255,255,0.2);
       backdrop-filter: blur(12px);
       border: 1px solid rgba(255,255,255,0.25);
-      padding: 0.7rem 1.5rem;
+      padding: 0.7rem 1.2rem;
       border-radius: 50px;
       font-weight: 600;
-      font-size: 0.9rem;
+      font-size: 0.85rem;
       cursor: pointer;
       transition: all 0.3s ease;
       color: white;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
     }
 
-    .reset-btn:hover {
+    .reset-btn:hover, .change-password-btn:hover {
       background: rgba(255,255,255,0.35);
       transform: translateY(-2px);
+    }
+
+    /* Modal Ganti Password */
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.7);
+      backdrop-filter: blur(8px);
+      z-index: 2000;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .modal.active {
+      display: flex;
+    }
+
+    .modal-content {
+      background: rgba(15, 23, 42, 0.95);
+      backdrop-filter: blur(20px);
+      border-radius: 1.5rem;
+      padding: 2rem;
+      width: 90%;
+      max-width: 400px;
+      border: 1px solid rgba(255,255,255,0.3);
+      animation: fadeInUp 0.3s ease;
+    }
+
+    .modal-content h3 {
+      color: white;
+      margin-bottom: 1.5rem;
+      text-align: center;
+      font-size: 1.3rem;
+    }
+
+    .modal-content .input-group {
+      margin-bottom: 1rem;
+    }
+
+    .modal-content .input-group label {
+      color: rgba(255,255,255,0.8);
+      font-size: 0.8rem;
+      font-weight: 600;
+      text-transform: uppercase;
+    }
+
+    .modal-content .input-group input {
+      width: 100%;
+      padding: 0.8rem 1rem;
+      border-radius: 1rem;
+      border: 1px solid rgba(255,255,255,0.3);
+      background: rgba(255,255,255,0.9);
+      font-size: 0.9rem;
+    }
+
+    .modal-buttons {
+      display: flex;
+      gap: 1rem;
+      margin-top: 1.5rem;
+    }
+
+    .modal-btn {
+      flex: 1;
+      padding: 0.8rem;
+      border-radius: 1rem;
+      border: none;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .modal-btn.confirm {
+      background: linear-gradient(135deg, #FFD700 0%, #FFA500 100%);
+      color: #1e293b;
+    }
+
+    .modal-btn.cancel {
+      background: rgba(255,255,255,0.2);
+      color: white;
+    }
+
+    .modal-message {
+      margin-top: 1rem;
+      padding: 0.5rem;
+      border-radius: 0.5rem;
+      text-align: center;
+      font-size: 0.8rem;
+      display: none;
+    }
+
+    .modal-message.success {
+      background: rgba(34,197,94,0.2);
+      color: #4ade80;
+      display: block;
+    }
+
+    .modal-message.error {
+      background: rgba(239,68,68,0.2);
+      color: #f87171;
+      display: block;
     }
 
     /* Balance Card */
@@ -323,6 +430,13 @@
       }
       .dashboard {
         padding: 1rem;
+      }
+      .header {
+        flex-direction: column;
+        align-items: stretch;
+      }
+      .user-info {
+        justify-content: center;
       }
     }
 
@@ -573,6 +687,30 @@
   </div>
 </div>
 
+<!-- MODAL GANTI PASSWORD -->
+<div id="changePasswordModal" class="modal">
+  <div class="modal-content">
+    <h3><i class="fas fa-key"></i> Ganti Password</h3>
+    <div class="input-group">
+      <label>Password Lama</label>
+      <input type="password" id="oldPasswordInput" placeholder="Masukkan password lama">
+    </div>
+    <div class="input-group">
+      <label>Password Baru</label>
+      <input type="password" id="newPasswordInput" placeholder="Masukkan password baru">
+    </div>
+    <div class="input-group">
+      <label>Konfirmasi Password Baru</label>
+      <input type="password" id="confirmPasswordInput" placeholder="Konfirmasi password baru">
+    </div>
+    <div id="modalMessage" class="modal-message"></div>
+    <div class="modal-buttons">
+      <button class="modal-btn cancel" id="cancelChangePwdBtn">Batal</button>
+      <button class="modal-btn confirm" id="confirmChangePwdBtn">Ganti Password</button>
+    </div>
+  </div>
+</div>
+
 <!-- DASHBOARD -->
 <div id="dashboard" class="dashboard">
   <div class="header">
@@ -580,7 +718,8 @@
       <h1><i class="fas fa-crown" style="color: #FFD700;"></i> WealthVault</h1>
       <p>Kelola tabungan & pengeluaran | Private & Secure</p>
     </div>
-    <div style="display: flex; gap: 1rem;">
+    <div style="display: flex; gap: 0.8rem; flex-wrap: wrap;">
+      <button class="change-password-btn" id="openChangePwdBtn"><i class="fas fa-key"></i> Ganti Password</button>
       <button class="reset-btn" id="resetDataBtn"><i class="fas fa-rotate-left"></i> Reset Data</button>
       <div class="user-info">
         <div class="user-avatar" id="userAvatar">U</div>
@@ -663,8 +802,7 @@
 
 <script>
   // ========= DAFTAR AKUN (PRIVATE) =========
-  // Anda dapat menambahkan atau menghapus akun sesuai kebutuhan
-  const USERS = {
+  let USERS = {
     'aris': {
       password: 'awas123',
       name: 'Aris',
@@ -673,9 +811,9 @@
     },
     'rifaldi': {
       password: 'asd123',
-      name: 'rifaldi',
+      name: 'Rifaldi',
       avatar: 'R',
-      storageKey: 'wealthvault_budi'
+      storageKey: 'wealthvault_rifaldi'
     }
   };
 
@@ -694,6 +832,16 @@
   const loginError = document.getElementById('loginError');
   const loggedUserSpan = document.getElementById('loggedUser');
   const userAvatar = document.getElementById('userAvatar');
+
+  // Modal Elements
+  const changePwdModal = document.getElementById('changePasswordModal');
+  const openChangePwdBtn = document.getElementById('openChangePwdBtn');
+  const cancelChangePwdBtn = document.getElementById('cancelChangePwdBtn');
+  const confirmChangePwdBtn = document.getElementById('confirmChangePwdBtn');
+  const oldPasswordInput = document.getElementById('oldPasswordInput');
+  const newPasswordInput = document.getElementById('newPasswordInput');
+  const confirmPasswordInput = document.getElementById('confirmPasswordInput');
+  const modalMessage = document.getElementById('modalMessage');
 
   // Dashboard Elements
   const totalBalanceSpan = document.getElementById('totalBalanceDisplay');
@@ -750,6 +898,99 @@
     passwordInput.value = '';
   }
 
+  // ========= FUNGSI GANTI PASSWORD =========
+  function openChangePasswordModal() {
+    oldPasswordInput.value = '';
+    newPasswordInput.value = '';
+    confirmPasswordInput.value = '';
+    modalMessage.className = 'modal-message';
+    modalMessage.style.display = 'none';
+    changePwdModal.classList.add('active');
+  }
+
+  function closeChangePasswordModal() {
+    changePwdModal.classList.remove('active');
+  }
+
+  function handleChangePassword() {
+    const oldPassword = oldPasswordInput.value;
+    const newPassword = newPasswordInput.value;
+    const confirmPassword = confirmPasswordInput.value;
+    
+    // Reset message
+    modalMessage.className = 'modal-message';
+    modalMessage.style.display = 'none';
+    
+    // Validasi
+    if (!oldPassword || !newPassword || !confirmPassword) {
+      modalMessage.textContent = '⚠️ Semua field harus diisi!';
+      modalMessage.className = 'modal-message error';
+      modalMessage.style.display = 'block';
+      return;
+    }
+    
+    if (oldPassword !== USERS[currentUser.username].password) {
+      modalMessage.textContent = '❌ Password lama salah!';
+      modalMessage.className = 'modal-message error';
+      modalMessage.style.display = 'block';
+      return;
+    }
+    
+    if (newPassword.length < 4) {
+      modalMessage.textContent = '⚠️ Password baru minimal 4 karakter!';
+      modalMessage.className = 'modal-message error';
+      modalMessage.style.display = 'block';
+      return;
+    }
+    
+    if (newPassword !== confirmPassword) {
+      modalMessage.textContent = '❌ Password baru dan konfirmasi tidak cocok!';
+      modalMessage.className = 'modal-message error';
+      modalMessage.style.display = 'block';
+      return;
+    }
+    
+    // Update password
+    USERS[currentUser.username].password = newPassword;
+    
+    // Simpan ke localStorage untuk persistensi
+    localStorage.setItem('wealthvault_users', JSON.stringify(USERS));
+    
+    modalMessage.textContent = '✅ Password berhasil diubah!';
+    modalMessage.className = 'modal-message success';
+    modalMessage.style.display = 'block';
+    
+    // Tutup modal setelah 1.5 detik
+    setTimeout(() => {
+      closeChangePasswordModal();
+    }, 1500);
+  }
+
+  // Load saved users from localStorage
+  function loadUsersFromStorage() {
+    const savedUsers = localStorage.getItem('wealthvault_users');
+    if (savedUsers) {
+      try {
+        const parsed = JSON.parse(savedUsers);
+        // Merge dengan default (tetap pertahankan struktur)
+        Object.keys(parsed).forEach(key => {
+          if (USERS[key]) {
+            USERS[key].password = parsed[key].password;
+          }
+        });
+      } catch(e) {}
+    }
+  }
+
+  // Save users to localStorage
+  function saveUsersToStorage() {
+    const usersToSave = {};
+    Object.keys(USERS).forEach(key => {
+      usersToSave[key] = { password: USERS[key].password };
+    });
+    localStorage.setItem('wealthvault_users', JSON.stringify(usersToSave));
+  }
+
   // ========= FUNGSI DATA PER USER =========
   function loadUserData() {
     if (!currentUser) return;
@@ -763,7 +1004,6 @@
         transactions = []; 
       }
     } else {
-      // Kosongkan transaksi, tidak ada data contoh
       transactions = [];
       saveUserData();
     }
@@ -997,6 +1237,16 @@
   usernameInput.addEventListener('keypress', (e) => { if(e.key === 'Enter') handleLogin(usernameInput.value, passwordInput.value); });
   passwordInput.addEventListener('keypress', (e) => { if(e.key === 'Enter') handleLogin(usernameInput.value, passwordInput.value); });
 
+  // Ganti Password
+  openChangePwdBtn.addEventListener('click', openChangePasswordModal);
+  cancelChangePwdBtn.addEventListener('click', closeChangePasswordModal);
+  confirmChangePwdBtn.addEventListener('click', handleChangePassword);
+  
+  // Tutup modal klik di luar
+  changePwdModal.addEventListener('click', (e) => {
+    if (e.target === changePwdModal) closeChangePasswordModal();
+  });
+
   // Dashboard event listeners
   addBtn.addEventListener('click', handleAddTransaction);
   resetBtn.addEventListener('click', resetAllData);
@@ -1004,6 +1254,9 @@
   quickFood.addEventListener('click', quickFoodAction);
   amountInput.addEventListener('keypress', (e) => { if(e.key === 'Enter') handleAddTransaction(); });
   descInput.addEventListener('keypress', (e) => { if(e.key === 'Enter') handleAddTransaction(); });
+
+  // Load saved users
+  loadUsersFromStorage();
 </script>
 </body>
 </html>
